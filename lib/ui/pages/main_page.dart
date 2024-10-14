@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hibi_track/ui/components/airing.dart';
-import 'package:hibi_track/ui/pages/anime_detail_page.dart';
+import 'package:hibi_track/ui/pages/random_detail_page.dart';
 
-class MainPages extends StatefulWidget {
+class MainPages extends StatelessWidget {
   const MainPages({super.key});
 
-  @override
-  State<MainPages> createState() => _MainPagesState();
-}
-
-class _MainPagesState extends State<MainPages> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -48,7 +43,7 @@ class _MainPagesState extends State<MainPages> {
                       onTap: () {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return const AnimeDetailPage();
+                          return const RandomDetailPage();
                         }));
                       },
                       child: const Card(
@@ -69,7 +64,7 @@ class _MainPagesState extends State<MainPages> {
                 ),
                 const SizedBox(height: 10),
                 const Expanded(
-                  child: Airing(),
+                  child: Airing(), // This is a StatefulWidget
                 ),
               ],
             ),

@@ -3,27 +3,25 @@ import 'package:hibi_track/model/anime_model.dart';
 import 'package:hibi_track/services/anime_service.dart';
 import 'package:hibi_track/ui/components/anime_detail.dart';
 
-class AnimeDetailPage extends StatefulWidget {
-  final int malId;
-
-  const AnimeDetailPage({super.key, required this.malId});
+class RandomDetailPage extends StatefulWidget {
+  const RandomDetailPage({super.key});
 
   @override
-  State<AnimeDetailPage> createState() => _AnimeDetailPageState();
+  State<RandomDetailPage> createState() => _RandomDetailPageState();
 }
 
-class _AnimeDetailPageState extends State<AnimeDetailPage> {
+class _RandomDetailPageState extends State<RandomDetailPage> {
   AnimeModel? animeDetail;
 
   @override
   void initState() {
     super.initState();
-    fetchDetailAnime(widget.malId);
+    fetchDetailRandomAnime();
   }
 
-  Future<void> fetchDetailAnime(int malId) async {
+  Future<void> fetchDetailRandomAnime() async {
     try {
-      AnimeResponse response = await fetchAnimeById(malId);
+      AnimeResponse response = await fetchRandomAnime();
       if (!mounted) return;
       setState(() {
         animeDetail = response.data;
@@ -31,7 +29,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch anime details: $e')),
+        const SnackBar(content: Text('Failed to fetch anime details')),
       );
     }
   }
