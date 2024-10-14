@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:hibi_track/model/airing_model.dart';
 import 'package:hibi_track/model/anime_model.dart';
+import 'package:hibi_track/model/schedule_model.dart';
 import 'package:http/http.dart' as http;
 
 Future<AiringResponse> fetchCurrentSeasonAnimes(int page) async {
@@ -33,5 +34,16 @@ Future<AnimeResponse> fetchAnimeById(int malId) async {
     return AnimeResponse.fromJson(json.decode(response.body));
   } else {
     throw Exception('Failed to load anime detail');
+  }
+}
+
+Future<ScheduleResponse> fetchScheduleByDays(String day) async {
+  final response = await http
+      .get(Uri.parse('https://api.jikan.moe/v4/schedules?filter=$day'));
+
+  if (response.statusCode == 200) {
+    return ScheduleResponse.fromJson(json.decode(response.body));
+  } else {
+    throw Exception('Failed to load schedule');
   }
 }

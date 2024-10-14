@@ -5,7 +5,6 @@ class AnimeModel {
   final String titleEnglish;
   final String titleJapanese;
   final String imageUrl;
-  final String trailerUrl;
   final String synopsis;
   final int episodes;
   final String type;
@@ -20,7 +19,6 @@ class AnimeModel {
     required this.titleEnglish,
     required this.titleJapanese,
     required this.imageUrl,
-    required this.trailerUrl,
     required this.synopsis,
     required this.episodes,
     required this.type,
@@ -37,7 +35,6 @@ class AnimeModel {
       titleEnglish: json['title_english'] ?? '',
       titleJapanese: json['title_japanese'] ?? '',
       imageUrl: json['images']['jpg']['image_url'],
-      trailerUrl: json['trailer']?['url'] ?? '',
       synopsis: json['synopsis'] ?? '',
       episodes: json['episodes'] ?? 0,
       type: json['type'] ?? '',

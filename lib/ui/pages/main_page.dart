@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hibi_track/ui/components/airing.dart';
 import 'package:hibi_track/ui/pages/random_detail_page.dart';
+import 'package:hibi_track/ui/pages/schedule_page.dart';
 
 class MainPages extends StatelessWidget {
   const MainPages({super.key});
@@ -31,9 +32,17 @@ class MainPages extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    const Card(
-                      color: Color.fromARGB(255, 139, 218, 255),
-                      child: Center(child: Text('Anime Schedule')),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const SchedulePage();
+                        }));
+                      },
+                      child: const Card(
+                        color: Color.fromARGB(255, 139, 218, 255),
+                        child: Center(child: Text('Anime Schedule')),
+                      ),
                     ),
                     const Card(
                       color: Color.fromARGB(255, 200, 230, 166),
@@ -64,7 +73,7 @@ class MainPages extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Expanded(
-                  child: Airing(), // This is a StatefulWidget
+                  child: Airing(),
                 ),
               ],
             ),
