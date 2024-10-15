@@ -22,11 +22,15 @@ class _AiringState extends State<Airing> {
   Future<void> fetchAnimes() async {
     try {
       AiringResponse response = await fetchCurrentSeasonAnimes(1);
+      if (!mounted) return;
       setState(() {
         currentSeasonAnime = response.data;
       });
     } catch (e) {
-      throw Exception('Failed to fetch current season data');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to fetch current season data')),
+      );
     }
   }
 

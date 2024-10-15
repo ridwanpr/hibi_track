@@ -58,3 +58,21 @@ class AnimeResponse {
     );
   }
 }
+
+class AnimeListResponse {
+  final List<AnimeModel> data;
+
+  AnimeListResponse({
+    required this.data,
+  });
+
+  factory AnimeListResponse.fromJson(Map<String, dynamic> json) {
+    var list = json['data'] as List;
+    List<AnimeModel> animeList =
+        list.map((i) => AnimeModel.fromJson(i)).toList();
+
+    return AnimeListResponse(
+      data: animeList,
+    );
+  }
+}

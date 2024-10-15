@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hibi_track/ui/components/airing.dart';
 import 'package:hibi_track/ui/pages/random_detail_page.dart';
 import 'package:hibi_track/ui/pages/schedule_page.dart';
+import 'package:hibi_track/ui/pages/top_anime_page.dart';
 
 class MainPages extends StatelessWidget {
   const MainPages({super.key});
@@ -44,9 +45,17 @@ class MainPages extends StatelessWidget {
                         child: Center(child: Text('Anime Schedule')),
                       ),
                     ),
-                    const Card(
-                      color: Color.fromARGB(255, 200, 230, 166),
-                      child: Center(child: Text('Top Anime')),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const TopAnimePage();
+                        }));
+                      },
+                      child: const Card(
+                        color: Color.fromARGB(255, 200, 230, 166),
+                        child: Center(child: Text('Top Anime')),
+                      ),
                     ),
                     InkWell(
                       onTap: () {

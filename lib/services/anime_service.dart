@@ -47,3 +47,14 @@ Future<ScheduleResponse> fetchScheduleByDays(String day) async {
     throw Exception('Failed to load schedule');
   }
 }
+
+Future<AnimeListResponse> fetchTopAnime() async {
+  final response =
+      await http.get(Uri.parse('https://api.jikan.moe/v4/top/anime'));
+
+  if (response.statusCode == 200) {
+    return AnimeListResponse.fromJson(json.decode(response.body));
+  } else {
+    throw Exception('Failed to load schedule');
+  }
+}
