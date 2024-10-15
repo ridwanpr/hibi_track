@@ -8,6 +8,11 @@ class ScheduleModel {
   final int totalEpisodes;
   final String? season;
   final int year;
+  final String source;
+  final String broadcastDay;
+  final String broadcastTime;
+  final String broadcastTimezone;
+  final String broadcastString;
 
   ScheduleModel({
     required this.malId,
@@ -19,6 +24,11 @@ class ScheduleModel {
     required this.totalEpisodes,
     this.season,
     required this.year,
+    required this.source,
+    required this.broadcastDay,
+    required this.broadcastTime,
+    required this.broadcastTimezone,
+    required this.broadcastString,
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +42,11 @@ class ScheduleModel {
       totalEpisodes: json['episodes'] ?? 0,
       season: json['season'],
       year: json['year'] ?? 0,
+      source: json['source'] ?? '',
+      broadcastDay: json['broadcast']['day'] ?? '',
+      broadcastTime: json['broadcast']['time'] ?? '',
+      broadcastTimezone: json['broadcast']['timezone'] ?? '',
+      broadcastString: json['broadcast']['string'] ?? '',
     );
   }
 }

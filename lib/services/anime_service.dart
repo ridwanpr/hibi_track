@@ -38,8 +38,8 @@ Future<AnimeResponse> fetchAnimeById(int malId) async {
 }
 
 Future<ScheduleResponse> fetchScheduleByDays(String day) async {
-  final response = await http
-      .get(Uri.parse('https://api.jikan.moe/v4/schedules?filter=$day'));
+  final response = await http.get(
+      Uri.parse('https://api.jikan.moe/v4/schedules?filter=$day&kids=false'));
 
   if (response.statusCode == 200) {
     return ScheduleResponse.fromJson(json.decode(response.body));

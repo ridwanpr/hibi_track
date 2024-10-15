@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:hibi_track/model/schedule_model.dart';
 import 'package:hibi_track/services/anime_service.dart';
 
@@ -12,9 +14,9 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   List<ScheduleModel> scheduleAnime = [];
   bool isLoading = true;
-  String selectedDay = 'monday';
+  String selectedDay = DateFormat('EEEE').format(DateTime.now()).toLowerCase();
 
-  final List<String> days = [
+  final List<String> daysForDropdown = [
     'monday',
     'tuesday',
     'wednesday',
@@ -24,22 +26,41 @@ class _SchedulePageState extends State<SchedulePage> {
     'sunday'
   ];
 
+  final Map<int, String> countdowns = {};
+
+  static const Map<String, int> daysOfWeek = {
+    'monday': DateTime.monday,
+    'tuesday': DateTime.tuesday,
+    'wednesday': DateTime.wednesday,
+    'thursday': DateTime.thursday,
+    'friday': DateTime.friday,
+    'saturday': DateTime.saturday,
+    'sunday': DateTime.sunday,
+  };
+
+  Timer? countdownTimer;
+
   @override
   void initState() {
     super.initState();
     fetchSchedule(selectedDay);
   }
 
-  Future<void> fetchSchedule(String day) async {
-    setState(() {
-      isLoading = true;
-    });
+  @override
+  void dispose() {
+    countdownTimer?.cancel();
+    super.dispose();
+  }
 
+  Future<void> fetchSchedule(String day) async {
+    setState(() => isLoading = true);
     try {
       ScheduleResponse response = await fetchScheduleByDays(day);
       if (!mounted) return;
+
       setState(() {
         scheduleAnime = response.data;
+        startCountdowns();
       });
     } catch (e) {
       if (!mounted) return;
@@ -47,15 +68,69 @@ class _SchedulePageState extends State<SchedulePage> {
         SnackBar(content: Text('Failed to fetch schedule: $e')),
       );
     } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void startCountdowns() {
+    countdownTimer?.cancel();
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
       setState(() {
-        isLoading = false;
+        for (var anime in scheduleAnime) {
+          DateTime now = DateTime.now();
+          DateTime broadcastTime =
+              getNextBroadcast(anime.broadcastDay, anime.broadcastTime);
+          if (broadcastTime.isBefore(now)) {
+            broadcastTime = broadcastTime.add(const Duration(days: 7));
+          }
+          Duration difference = broadcastTime.difference(now);
+          countdowns[anime.malId] = formatDuration(difference);
+        }
       });
+    });
+  }
+
+  DateTime getNextBroadcast(String day, String time) {
+    int broadcastDay = daysOfWeek[day.toLowerCase()] ?? DateTime.now().weekday;
+
+    var now = DateTime.now();
+    var parsedTime = DateFormat('HH:mm').parse(time);
+    var broadcastDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
+
+    var daysUntilNext = (broadcastDay - now.weekday + 7) % 7;
+
+    if (daysUntilNext == 0 && broadcastDateTime.isBefore(now)) {
+      daysUntilNext = 7;
+    }
+
+    return broadcastDateTime.add(Duration(days: daysUntilNext));
+  }
+
+  String formatDuration(Duration duration) {
+    int hours = duration.inHours;
+    int minutes = duration.inMinutes % 60;
+    int seconds = duration.inSeconds % 60;
+
+    if (hours > 0) {
+      return '$hours hours, $minutes minutes, $seconds seconds';
+    } else if (minutes > 0) {
+      return '$minutes minutes, $seconds seconds';
+    } else {
+      return '$seconds seconds';
     }
   }
 
   void onDaySelected(String day) {
     setState(() {
       selectedDay = day;
+      countdowns.clear();
     });
     fetchSchedule(day);
   }
@@ -73,7 +148,7 @@ class _SchedulePageState extends State<SchedulePage> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButton<String>(
               value: selectedDay,
-              items: days.map((String day) {
+              items: daysForDropdown.map((String day) {
                 return DropdownMenuItem<String>(
                   value: day,
                   child: Text(day[0].toUpperCase() + day.substring(1)),
@@ -89,96 +164,110 @@ class _SchedulePageState extends State<SchedulePage> {
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ...scheduleAnime.map((anime) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Card(
-                              elevation: 2,
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 125,
-                                    height: 180,
-                                    child: Image.network(
-                                      anime.imageUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.error),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            anime.title,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            anime.titleEnglish,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          Text(
-                                            anime.titleJapanese,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Type: ${anime.type}',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Episodes: ${anime.totalEpisodes}',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Season: ${anime.season ?? ''}',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                  child: ListView.builder(
+                    itemCount: scheduleAnime.length,
+                    itemBuilder: (context, index) {
+                      final anime = scheduleAnime[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6.0, horizontal: 12.0),
+                        child: Card(
+                          elevation: 3,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 130,
+                                height: 200,
+                                child: Image.network(
+                                  anime.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.error),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        anime.title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      if (anime.titleEnglish.isNotEmpty)
+                                        Text(
+                                          'English: ${anime.titleEnglish}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      if (anime.titleJapanese.isNotEmpty)
+                                        Text(
+                                          'Japanese: ${anime.titleJapanese}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Type: ${anime.type}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Episodes: ${anime.totalEpisodes}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Source: ${anime.source}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Broadcast: ${anime.broadcastString}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Next episode in: ${countdowns[anime.malId] ?? '-'}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
         ],
