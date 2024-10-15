@@ -17,13 +17,6 @@ class MainPages extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Search Anime',
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                ),
-                const SizedBox(height: 10),
                 Column(
                   children: [
                     Row(

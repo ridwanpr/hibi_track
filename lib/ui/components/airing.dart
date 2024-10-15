@@ -45,8 +45,6 @@ class _AiringState extends State<Airing> {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount > 2 ? crossAxisCount : 3,
             childAspectRatio: 0.6,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
           ),
           padding: const EdgeInsets.all(10),
           itemCount: currentSeasonAnime.length,
