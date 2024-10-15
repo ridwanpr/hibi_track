@@ -24,54 +24,61 @@ class MainPages extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                GridView.count(
-                  crossAxisCount: 2,
-                  childAspectRatio: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  padding: const EdgeInsets.all(10),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                Column(
                   children: [
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return const SchedulePage();
-                        }));
-                      },
-                      child: const Card(
-                        color: Color.fromARGB(255, 139, 218, 255),
-                        child: Center(child: Text('Anime Schedule')),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SchedulePage()),
+                            ),
+                            child: const Card(
+                              color: Color.fromARGB(255, 139, 218, 255),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(child: Text('Anime Schedule')),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const TopAnimePage())),
+                            child: const Card(
+                              color: Color.fromARGB(255, 200, 230, 166),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: Text('Top Anime'),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
                     InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return const TopAnimePage();
-                        }));
-                      },
-                      child: const Card(
-                        color: Color.fromARGB(255, 200, 230, 166),
-                        child: Center(child: Text('Top Anime')),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RandomDetailPage()),
                       ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return const RandomDetailPage();
-                        }));
-                      },
                       child: const Card(
                         color: Color.fromARGB(255, 247, 164, 192),
-                        child: Center(child: Text('Random Anime')),
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: Text('Discover Random Anime')),
+                        ),
                       ),
-                    ),
-                    const Card(
-                      color: Color.fromARGB(255, 223, 166, 233),
-                      child: Center(child: Text('Upcoming Season')),
                     ),
                   ],
                 ),
