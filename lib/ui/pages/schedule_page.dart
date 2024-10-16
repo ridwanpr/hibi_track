@@ -81,7 +81,7 @@ class _SchedulePageState extends State<SchedulePage> {
         for (var anime in scheduleAnime) {
           DateTime now = DateTime.now();
           DateTime broadcastTime =
-              getNextBroadcast(anime.broadcastDay, anime.broadcastTime);
+              getNextBroadcast(anime.broadcastDay, anime.broadcastTime ?? '-');
           if (broadcastTime.isBefore(now)) {
             broadcastTime = broadcastTime.add(const Duration(days: 7));
           }
@@ -96,15 +96,22 @@ class _SchedulePageState extends State<SchedulePage> {
     int broadcastDay = daysOfWeek[day.toLowerCase()] ?? DateTime.now().weekday;
 
     var now = DateTime.now();
-    var parsedTime = DateFormat('HH:mm').parse(time);
-    var broadcastDateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      parsedTime.hour,
-      parsedTime.minute,
-    );
+    DateTime broadcastDateTime;
 
+    try {
+      var parsedTime = DateFormat('HH:mm').parse(time);
+      broadcastDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        parsedTime.hour,
+        parsedTime.minute,
+      );
+    } catch (e) {
+      debugPrint(
+          'Error parsing time: $e,  datetime not valid.... data ignored.');
+      return now;
+    }
     var daysUntilNext = (broadcastDay - now.weekday + 7) % 7;
 
     if (daysUntilNext == 0 && broadcastDateTime.isBefore(now)) {
@@ -169,114 +176,119 @@ class _SchedulePageState extends State<SchedulePage> {
                     itemCount: scheduleAnime.length,
                     itemBuilder: (context, index) {
                       final anime = scheduleAnime[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 6.0, horizontal: 12.0),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return AnimeDetailPage(
-                                  malId: scheduleAnime[index].malId);
-                            }));
-                          },
-                          child: Card(
-                            elevation: 3,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: 130,
-                                  height: 200,
-                                  child: Image.network(
-                                    anime.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.error),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          anime.title,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        if (anime.titleEnglish.isNotEmpty)
-                                          Text(
-                                            'English: ${anime.titleEnglish}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        if (anime.titleJapanese.isNotEmpty)
-                                          Text(
-                                            'Japanese: ${anime.titleJapanese}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Type: ${anime.type}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Episodes: ${anime.totalEpisodes}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Source: ${anime.source}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Broadcast: ${anime.broadcastString}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Next episode in: ${countdowns[anime.malId] ?? '-'}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.redAccent,
-                                          ),
-                                        ),
-                                      ],
+                      if (anime.broadcastTime!.isNotEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 6.0, horizontal: 12.0),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return AnimeDetailPage(
+                                    malId: scheduleAnime[index].malId);
+                              }));
+                            },
+                            child: Card(
+                              elevation: 3,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 130,
+                                    height: 200,
+                                    child: Image.network(
+                                      anime.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.error),
+                                        );
+                                      },
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            anime.title,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          if (anime.titleEnglish.isNotEmpty)
+                                            Text(
+                                              'English: ${anime.titleEnglish}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          if (anime.titleJapanese.isNotEmpty)
+                                            Text(
+                                              'Japanese: ${anime.titleJapanese}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Type: ${anime.type}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Episodes: ${anime.totalEpisodes}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Source: ${anime.source}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Broadcast: ${anime.broadcastString}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Next episode in: ${countdowns[anime.malId] ?? '-'}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.redAccent,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
                     },
                   ),
                 ),

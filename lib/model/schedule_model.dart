@@ -10,9 +10,9 @@ class ScheduleModel {
   final int year;
   final String source;
   final String broadcastDay;
-  final String broadcastTime;
-  final String broadcastTimezone;
-  final String broadcastString;
+  final String? broadcastTime;
+  final String? broadcastTimezone;
+  final String? broadcastString;
 
   ScheduleModel({
     required this.malId,
